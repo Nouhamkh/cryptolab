@@ -161,7 +161,11 @@
   </div>
 
   <script>
-    const API = '/api';
+    // In production (Netlify), call the Render backend directly.
+    // When the UI is served by FastAPI itself, relative /api still works.
+    const API = (window.location.hostname === 'cryptolab-nouhamkh.netlify.app')
+      ? 'https://cryptolab-7k84.onrender.com/api'
+      : '/api';
     const ACK_HEADER = { 'X-Acknowledge-Educational': 'true' };
 
     function escapeHtml(s) {

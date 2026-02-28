@@ -5,6 +5,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from crypto_lab import __version__
 from crypto_lab.web.routers import algorithms, encrypt, decrypt
@@ -17,6 +18,20 @@ app = FastAPI(
     title="Crypto Lab",
     description="Educational & Modern Cryptography Playground",
     version=__version__,
+)
+
+# CORS so Netlify (and local dev) can call the API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://cryptolab-nouhamkh.netlify.app",
+        "https://cryptolab-7k84.onrender.com",
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(algorithms.router)
