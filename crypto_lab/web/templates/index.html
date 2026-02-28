@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crypto Lab – Educational &amp; Modern Cryptography Playground</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --border: #2d3a4d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --warn: #d29922;
+      --danger: #f85149;
+      --success: #3fb950;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 1rem 2rem;
+      line-height: 1.5;
+    }
+    h1 { font-size: 1.5rem; margin-top: 0; }
+    .tabs {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .tabs button {
+      background: none;
+      border: none;
+      color: var(--muted);
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+    .tabs button:hover { color: var(--text); }
+    .tabs button.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .banner {
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+    }
+    .banner.warn { background: rgba(210,153,34,0.15); border: 1px solid var(--warn); color: var(--warn); }
+    .banner.danger { background: rgba(248,81,73,0.15); border: 1px solid var(--danger); color: var(--danger); }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; margin-bottom: 0.25rem; color: var(--muted); font-size: 0.875rem; }
+    input[type="text"], input[type="password"], select, textarea {
+      width: 100%;
+      max-width: 600px;
+      padding: 0.5rem 0.75rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: inherit;
+    }
+    textarea { min-height: 120px; resize: vertical; }
+    button.primary {
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    button.primary:hover { filter: brightness(1.1); }
+    .meta-panel {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: var(--surface);
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      font-size: 0.875rem;
+    }
+    .meta-panel pre { margin: 0; overflow: auto; white-space: pre-wrap; word-break: break-all; }
+    .file-row { margin-top: 0.5rem; }
+    .error { color: var(--danger); margin-top: 0.5rem; }
+    .success { color: var(--success); margin-top: 0.5rem; }
+    .muted { color: var(--muted); }
+    a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <h1>Crypto Lab</h1>
+  <p style="color: var(--muted);">Educational &amp; modern cryptography playground. For learning and demonstration only.</p>
+
+  <div class="tabs">
+    <button type="button" data-tab="modern" class="active">Modern (recommended)</button>
+    <button type="button" data-tab="educational">Educational</button>
+  </div>
+
+  <div id="banner-educational" class="panel banner warn">
+    <strong>For teaching only.</strong> These ciphers are not safe for real data. Never use for production.
+  </div>
+  <div id="banner-modern" class="panel banner" style="display:none;"></div>
+
+  <div id="panel-modern" class="panel active">
+    <div class="form-group">
+      <label>Algorithm</label>
+      <select id="alg-modern">
+        <option value="">Loading…</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Key (base64) or Password</label>
+      <input type="text" id="key-modern" placeholder="Paste key_b64 or enter password">
+      <button type="button" class="primary" id="gen-key-modern" style="margin-top:0.5rem;">Generate 32-byte key</button>
+    </div>
+    <div class="form-group">
+      <label>Plaintext</label>
+      <textarea id="plain-modern" placeholder="Enter text to encrypt"></textarea>
+    </div>
+    <button type="button" class="primary" id="encrypt-modern">Encrypt</button>
+    <div id="out-enc-modern" class="meta-panel" style="display:none;"></div>
+    <hr style="margin:1.5rem 0; border-color: var(--border);">
+    <div class="form-group">
+      <label>Encrypted envelope (JSON)</label>
+      <textarea id="cipher-modern" placeholder="Paste envelope JSON to decrypt"></textarea>
+    </div>
+    <button type="button" class="primary" id="decrypt-modern">Decrypt</button>
+    <div id="out-dec-modern" class="meta-panel" style="display:none;"></div>
+  </div>
+
+  <div id="panel-educational" class="panel">
+    <div class="form-group">
+      <label>Algorithm</label>
+      <select id="alg-edu">
+        <option value="">Loading…</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Key
+        (Caesar: shift number like 3;
+        Rail Fence: number of rails like 3;
+        Vigenère: word like KEY)</label>
+      <input type="text" id="key-edu" placeholder="e.g. 3 for Caesar, 3 rails, or KEY for Vigenère">
+    </div>
+    <div class="form-group">
+      <label>Plaintext</label>
+      <textarea id="plain-edu" placeholder="Text to encrypt"></textarea>
+    </div>
+    <button type="button" class="primary" id="encrypt-edu">Encrypt</button>
+    <div id="out-enc-edu" class="meta-panel" style="display:none;"></div>
+    <hr style="margin:1.5rem 0; border-color: var(--border);">
+    <div class="form-group">
+      <label>Encrypted envelope (JSON)</label>
+      <textarea id="cipher-edu" placeholder="Paste envelope to decrypt"></textarea>
+    </div>
+    <button type="button" class="primary" id="decrypt-edu">Decrypt</button>
+    <div id="out-dec-edu" class="meta-panel" style="display:none;"></div>
+  </div>
+
+  <script>
+    const API = '/api';
+    const ACK_HEADER = { 'X-Acknowledge-Educational': 'true' };
+
+    function escapeHtml(s) {
+      const div = document.createElement('div');
+      div.textContent = s;
+      return div.innerHTML;
+    }
+
+    async function getAlgorithms(classification) {
+      const q = classification ? `?classification=${classification}` : '';
+      const r = await fetch(API + '/algorithms' + q);
+      if (!r.ok) throw new Error(await r.text());
+      const data = await r.json();
+      return data.algorithms || [];
+    }
+
+    async function generateKey(bytes = 32) {
+      const r = await fetch(API + '/key/generate?bytes=' + bytes);
+      if (!r.ok) throw new Error(await r.text());
+      const data = await r.json();
+      return data.key_b64;
+    }
+
+    function fillSelect(selectId, list, key = 'algorithm_id', label = 'display_name') {
+      const sel = document.getElementById(selectId);
+      sel.innerHTML = list.map(a => `<option value="${escapeHtml(a[key])}">${escapeHtml(a[label])} (${escapeHtml(a[key])})</option>`).join('');
+    }
+
+    async function loadAlgorithms() {
+      try {
+        const [modern, edu] = await Promise.all([
+          getAlgorithms('modern_recommended'),
+          getAlgorithms('educational'),
+        ]);
+        fillSelect('alg-modern', modern);
+        fillSelect('alg-edu', edu);
+      } catch (e) {
+        console.error(e);
+        document.getElementById('alg-modern').innerHTML = '<option value="">Failed to load (check console)</option>';
+        document.getElementById('alg-edu').innerHTML = '<option value="">Failed to load (check console)</option>';
+      }
+    }
+
+    async function encryptText(panel, useAck = false) {
+      const algSel = document.getElementById(panel === 'modern' ? 'alg-modern' : 'alg-edu');
+      const keyIn = document.getElementById(panel === 'modern' ? 'key-modern' : 'key-edu');
+      const plain = document.getElementById(panel === 'modern' ? 'plain-modern' : 'plain-edu');
+      const outEl = document.getElementById(panel === 'modern' ? 'out-enc-modern' : 'out-enc-edu');
+      outEl.style.display = 'block';
+      outEl.innerHTML = '<span class="muted">Encrypting…</span>';
+      try {
+        if (!algSel.value) {
+          outEl.innerHTML = '<span class="error">Select an algorithm first.</span>';
+          return;
+        }
+        const raw = keyIn.value.trim();
+        const algId = algSel.value;
+
+        let key_b64 = null;
+        let password = null;
+
+        if (panel === 'educational') {
+          if (algId === 'caesar' || algId === 'rail_fence') {
+            // Plain numeric key: shift (Caesar) or rails (Rail Fence).
+            const n = parseInt(raw, 10);
+            if (!Number.isNaN(n)) {
+              const byte = n & 0xff;
+              key_b64 = btoa(String.fromCharCode(byte));
+            } else if (raw) {
+              // Fallback: still allow pasting a base64 key directly.
+              key_b64 = raw;
+            }
+          } else if (algId === 'vigenere') {
+            // Treat the raw word (e.g. KEY) as the key bytes directly.
+            if (raw) {
+              key_b64 = btoa(raw);
+            }
+          } else if (raw) {
+            const looksBase64 = raw && (raw.includes('=') || (/^[A-Za-z0-9+/]+$/.test(raw) && raw.length >= 16));
+            key_b64 = looksBase64 ? raw : null;
+            password = !looksBase64 ? raw : null;
+          }
+        } else if (raw) {
+          const looksBase64 = raw && (raw.includes('=') || (/^[A-Za-z0-9+/]+$/.test(raw) && raw.length >= 16));
+          key_b64 = looksBase64 ? raw : null;
+          password = !looksBase64 ? raw : null;
+        }
+
+        const body = {
+          algorithm_id: algId,
+          plaintext: plain.value,
+          key_b64,
+          password,
+        };
+        if (!body.key_b64 && !body.password) {
+          outEl.innerHTML = '<span class="error">Enter a key (or click Generate 32-byte key) or a password.</span>';
+          return;
+        }
+        const headers = { 'Content-Type': 'application/json', ...(useAck ? ACK_HEADER : {}) };
+        const r = await fetch(API + '/encrypt/text', { method: 'POST', headers, body: JSON.stringify(body) });
+        const errText = await r.text();
+        if (!r.ok) {
+          let msg = errText;
+          try { const j = JSON.parse(errText); if (j.detail) msg = typeof j.detail === 'string' ? j.detail : JSON.stringify(j.detail); } catch (_) {}
+          outEl.innerHTML = '<span class="error">' + escapeHtml(msg) + '</span>';
+          return;
+        }
+        const data = JSON.parse(errText);
+        outEl.innerHTML = '<strong>Envelope (copy to decrypt):</strong><pre>' + escapeHtml(data.envelope_json) + '</pre><strong>Metadata:</strong><pre>' + escapeHtml(JSON.stringify(data.metadata, null, 2)) + '</pre>';
+        const cipherTa = document.getElementById(panel === 'modern' ? 'cipher-modern' : 'cipher-edu');
+        cipherTa.value = data.envelope_json;
+      } catch (e) {
+        outEl.innerHTML = '<span class="error">' + escapeHtml(e.message || String(e)) + '</span>';
+      }
+    }
+
+    async function decryptText(panel, useAck = false) {
+      const keyIn = document.getElementById(panel === 'modern' ? 'key-modern' : 'key-edu');
+      const cipherTa = document.getElementById(panel === 'modern' ? 'cipher-modern' : 'cipher-edu');
+      const outEl = document.getElementById(panel === 'modern' ? 'out-dec-modern' : 'out-dec-edu');
+      outEl.style.display = 'block';
+      outEl.innerHTML = '<span class="muted">Decrypting…</span>';
+      try {
+        const rawEnvelope = cipherTa.value.trim();
+        if (!rawEnvelope) {
+          outEl.innerHTML = '<span class="error">Paste an encrypted envelope (JSON) first, or encrypt something above.</span>';
+          return;
+        }
+        const raw = keyIn.value.trim();
+
+        let key_b64 = null;
+        let password = null;
+
+        // Try to recover alg_id from the envelope header so we can
+        // mirror the same key behaviour as encryptText for educational ciphers.
+        let algId = null;
+        try {
+          const parsed = JSON.parse(rawEnvelope);
+          if (parsed && parsed.header && parsed.header.alg_id) {
+            algId = parsed.header.alg_id;
+          }
+        } catch (_) {
+          // If parsing fails we just fall back to generic handling below.
+        }
+
+        if (panel === 'educational' && algId) {
+          if (algId === 'caesar' || algId === 'rail_fence') {
+            const n = parseInt(raw, 10);
+            if (!Number.isNaN(n)) {
+              const byte = n & 0xff;
+              key_b64 = btoa(String.fromCharCode(byte));
+            } else if (raw) {
+              key_b64 = raw;
+            }
+          } else if (algId === 'vigenere') {
+            if (raw) {
+              key_b64 = btoa(raw);
+            }
+          } else if (raw) {
+            const looksBase64 = raw && (raw.includes('=') || (/^[A-Za-z0-9+/]+$/.test(raw) && raw.length >= 16));
+            key_b64 = looksBase64 ? raw : null;
+            password = !looksBase64 ? raw : null;
+          }
+        } else if (raw) {
+          const looksBase64 = raw && (raw.includes('=') || (/^[A-Za-z0-9+/]+$/.test(raw) && raw.length >= 16));
+          key_b64 = looksBase64 ? raw : null;
+          password = !looksBase64 ? raw : null;
+        }
+
+        const body = {
+          envelope_json: rawEnvelope,
+          key_b64,
+          password,
+        };
+        if (!body.key_b64 && !body.password) {
+          outEl.innerHTML = '<span class="error">Enter the same key or password used to encrypt.</span>';
+          return;
+        }
+        const headers = { 'Content-Type': 'application/json', ...(useAck ? ACK_HEADER : {}) };
+        const r = await fetch(API + '/decrypt/text', { method: 'POST', headers, body: JSON.stringify(body) });
+        const errText = await r.text();
+        if (!r.ok) {
+          let msg = errText;
+          try { const j = JSON.parse(errText); if (j.detail) msg = typeof j.detail === 'string' ? j.detail : JSON.stringify(j.detail); } catch (_) {}
+          outEl.innerHTML = '<span class="error">' + escapeHtml(msg) + '</span>';
+          return;
+        }
+        const data = JSON.parse(errText);
+        outEl.innerHTML = '<strong>Decrypted:</strong><pre>' + escapeHtml(data.plaintext) + '</pre><strong>Metadata:</strong><pre>' + escapeHtml(JSON.stringify(data.metadata, null, 2)) + '</pre>';
+      } catch (e) {
+        outEl.innerHTML = '<span class="error">' + escapeHtml(e.message || String(e)) + '</span>';
+      }
+    }
+
+    document.querySelectorAll('.tabs button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.dataset.tab;
+        document.getElementById('panel-' + tab).classList.add('active');
+        document.getElementById('banner-educational').style.display = tab === 'educational' ? 'block' : 'none';
+      });
+    });
+
+    document.getElementById('gen-key-modern').addEventListener('click', async () => {
+      try {
+        document.getElementById('key-modern').value = await generateKey(32);
+      } catch (e) {
+        alert(e.message || String(e));
+      }
+    });
+
+    document.getElementById('encrypt-modern').addEventListener('click', () => encryptText('modern', false));
+    document.getElementById('decrypt-modern').addEventListener('click', () => decryptText('modern', false));
+    document.getElementById('encrypt-edu').addEventListener('click', () => encryptText('educational', true));
+    document.getElementById('decrypt-edu').addEventListener('click', () => decryptText('educational', true));
+
+    loadAlgorithms();
+  </script>
+</body>
+</html>
