@@ -97,6 +97,9 @@
   <div class="tabs">
     <button type="button" data-tab="modern" class="active">Modern (recommended)</button>
     <button type="button" data-tab="educational">Educational</button>
+    <button type="button" data-tab="insights">Security Insights</button>
+    <button type="button" data-tab="red">Red Team Mode</button>
+    <button type="button" data-tab="realworld">Real-World Scenarios</button>
   </div>
 
   <div id="banner-educational" class="panel banner warn">
@@ -160,6 +163,127 @@
     <div id="out-dec-edu" class="meta-panel" style="display:none;"></div>
   </div>
 
+  <div id="panel-insights" class="panel">
+    <div class="meta-panel">
+      <h2>Security Insights</h2>
+      <h3>Why Caesar is breakable</h3>
+      <ul>
+        <li>Only 26 possible shifts (tiny key space) so attackers can brute-force every key in milliseconds.</li>
+        <li>It preserves letter frequencies, so a simple frequency analysis reveals likely shifts.</li>
+        <li>Any known word (like "THE") in the plaintext can reveal the correct shift immediately.</li>
+      </ul>
+
+      <h3>Why RSA requires proper key sizes</h3>
+      <ul>
+        <li>RSA security is based on the difficulty of factoring large integers.</li>
+        <li>Keys that are too small (e.g. 512- or 1024-bit) can be factored with modern hardware.</li>
+        <li>Today, real systems typically use at least 2048-bit or 3072-bit RSA keys.</li>
+      </ul>
+
+      <h3>Why hashing ≠ encryption</h3>
+      <ul>
+        <li>Encryption is reversible with the correct key; hashing is designed to be one-way.</li>
+        <li>Hashes are for integrity and password storage, not for hiding data you need to recover.</li>
+        <li>If you can "decrypt" a hash, it was either not a real hash or the password was guessed.</li>
+      </ul>
+
+      <h3>Why salting matters</h3>
+      <ul>
+        <li>A salt is random data added before hashing (e.g. <code>hash(salt || password)</code>).</li>
+        <li>Salts make precomputed rainbow tables useless and ensure identical passwords get different hashes.</li>
+        <li>Each user should have their own unique salt stored alongside the hash.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="panel-red" class="panel">
+    <div class="meta-panel">
+      <h2>Red Team Mode</h2>
+
+      <h3>1. Brute-force Caesar cipher</h3>
+      <p class="muted">Paste Caesar-encrypted text and try all 26 shifts to see how trivial brute-force is.</p>
+      <div class="form-group">
+        <label>Ciphertext</label>
+        <textarea id="red-bf-input" placeholder="Paste Caesar ciphertext here"></textarea>
+      </div>
+      <button type="button" class="primary" id="red-bf-run">Run brute-force</button>
+      <div id="red-bf-output" class="meta-panel" style="margin-top:0.75rem; display:none;"></div>
+
+      <hr style="margin:1.5rem 0; border-color: var(--border);">
+
+      <h3>2. Frequency analysis</h3>
+      <p class="muted">Run a simple letter-frequency analysis to spot language patterns in ciphertext.</p>
+      <div class="form-group">
+        <label>Text (ciphertext or plaintext)</label>
+        <textarea id="red-fa-input" placeholder="Paste text to analyze"></textarea>
+      </div>
+      <button type="button" class="primary" id="red-fa-run">Analyze frequencies</button>
+      <div id="red-fa-output" class="meta-panel" style="margin-top:0.75rem; display:none;"></div>
+
+      <hr style="margin:1.5rem 0; border-color: var(--border);">
+
+      <h3>3. Hash cracking simulation</h3>
+      <p class="muted">
+        This simulates an offline attack: given a SHA-256 hash, try a small dictionary of common passwords.
+        Use the example hash for <code>password123</code>:
+        <code>ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f</code>.
+      </p>
+      <div class="form-group">
+        <label>Target hash (SHA-256, hex)</label>
+        <input type="text" id="red-hash-input" placeholder="Paste SHA-256 hash here">
+      </div>
+      <button type="button" class="primary" id="red-hash-run">Run hash cracking simulation</button>
+      <div id="red-hash-output" class="meta-panel" style="margin-top:0.75rem; display:none;"></div>
+    </div>
+  </div>
+
+  <div id="panel-realworld" class="panel">
+    <div class="meta-panel">
+      <h2>Real-World Use Cases</h2>
+
+      <h3>1. Password hashing simulation</h3>
+      <p class="muted">
+        In real systems, passwords are not encrypted and stored; they are salted and hashed.
+        This demo uses a simplified model: <code>SHA-256(salt || password)</code>.
+      </p>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="pw-sim-password" placeholder="Enter a demo password">
+      </div>
+      <div class="form-group">
+        <label>Salt</label>
+        <input type="text" id="pw-sim-salt" placeholder="Random salt, e.g. 8–16 random characters">
+      </div>
+      <button type="button" class="primary" id="pw-sim-run">Hash password</button>
+      <div id="pw-sim-output" class="meta-panel" style="margin-top:0.75rem; display:none;"></div>
+
+      <hr style="margin:1.5rem 0; border-color: var(--border);">
+
+      <h3>2. Secure message exchange &amp; MITM risk</h3>
+      <p class="muted">
+        Compare what an attacker on the network sees with and without TLS. This is a conceptual demo, not real TLS.
+      </p>
+      <div class="form-group">
+        <label>Message from Alice to Bob</label>
+        <textarea id="msg-sim-plaintext" placeholder="Type a short message"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Transport mode</label>
+        <select id="msg-sim-mode">
+          <option value="notls">No TLS (HTTP)</option>
+          <option value="tls">With TLS (HTTPS)</option>
+        </select>
+      </div>
+      <button type="button" class="primary" id="msg-sim-run">Simulate network view</button>
+      <div id="msg-sim-output" class="meta-panel" style="margin-top:0.75rem; display:none;"></div>
+
+      <p class="muted" style="margin-top:1rem;">
+        Without TLS, a man-in-the-middle can read and modify messages in transit.
+        With TLS, the attacker only sees encrypted blobs and cannot safely tamper without breaking the connection.
+      </p>
+    </div>
+  </div>
+
   <script>
     // In production (Netlify), call the Render backend directly.
     // When the UI is served by FastAPI itself, relative /api still works.
@@ -192,6 +316,24 @@
     function fillSelect(selectId, list, key = 'algorithm_id', label = 'display_name') {
       const sel = document.getElementById(selectId);
       sel.innerHTML = list.map(a => `<option value="${escapeHtml(a[key])}">${escapeHtml(a[label])} (${escapeHtml(a[key])})</option>`).join('');
+    }
+
+    function renderCiphertextViewsFromEnvelope(env) {
+      if (!env || typeof env !== 'object') return '';
+      let html = '';
+      if (env.ciphertext_b64) {
+        html += '<strong>Ciphertext (base64):</strong><pre>' + escapeHtml(env.ciphertext_b64) + '</pre>';
+        try {
+          const raw = atob(env.ciphertext_b64);
+          html += '<strong>Ciphertext (raw bytes as text):</strong><pre>' + escapeHtml(raw) + '</pre>';
+        } catch (_) {
+          // Ignore decoding errors; base64 might be malformed.
+        }
+      }
+      if (env.ciphertext_hex) {
+        html += '<strong>Ciphertext (hex):</strong><pre>' + escapeHtml(env.ciphertext_hex) + '</pre>';
+      }
+      return html;
     }
 
     async function loadAlgorithms() {
@@ -274,7 +416,17 @@
           return;
         }
         const data = JSON.parse(errText);
-        outEl.innerHTML = '<strong>Envelope (copy to decrypt):</strong><pre>' + escapeHtml(data.envelope_json) + '</pre><strong>Metadata:</strong><pre>' + escapeHtml(JSON.stringify(data.metadata, null, 2)) + '</pre>';
+        let cipherViews = '';
+        try {
+          const env = JSON.parse(data.envelope_json);
+          cipherViews = renderCiphertextViewsFromEnvelope(env);
+        } catch (_) {
+          // If parsing fails, just show the envelope and metadata.
+        }
+        outEl.innerHTML =
+          '<strong>Envelope (copy to decrypt):</strong><pre>' + escapeHtml(data.envelope_json) + '</pre>' +
+          cipherViews +
+          '<strong>Metadata:</strong><pre>' + escapeHtml(JSON.stringify(data.metadata, null, 2)) + '</pre>';
         const cipherTa = document.getElementById(panel === 'modern' ? 'cipher-modern' : 'cipher-edu');
         cipherTa.value = data.envelope_json;
       } catch (e) {
@@ -354,9 +506,174 @@
           return;
         }
         const data = JSON.parse(errText);
-        outEl.innerHTML = '<strong>Decrypted:</strong><pre>' + escapeHtml(data.plaintext) + '</pre><strong>Metadata:</strong><pre>' + escapeHtml(JSON.stringify(data.metadata, null, 2)) + '</pre>';
+        let cipherViews = '';
+        try {
+          const env = JSON.parse(rawEnvelope);
+          cipherViews = renderCiphertextViewsFromEnvelope(env);
+        } catch (_) {
+          // If parsing fails, just skip ciphertext views.
+        }
+        outEl.innerHTML =
+          '<strong>Decrypted:</strong><pre>' + escapeHtml(data.plaintext) + '</pre>' +
+          cipherViews +
+          '<strong>Metadata:</strong><pre>' + escapeHtml(JSON.stringify(data.metadata, null, 2)) + '</pre>';
       } catch (e) {
         outEl.innerHTML = '<span class="error">' + escapeHtml(e.message || String(e)) + '</span>';
+      }
+    }
+
+    function caesarShift(text, shift) {
+      const s = ((shift % 26) + 26) % 26;
+      return text.replace(/[A-Za-z]/g, ch => {
+        const base = ch >= 'a' && ch <= 'z' ? 'a'.charCodeAt(0) : 'A'.charCodeAt(0);
+        const code = ch.charCodeAt(0) - base;
+        return String.fromCharCode(base + ((code + s + 26) % 26));
+      });
+    }
+
+    function runRedTeamBruteForce() {
+      const input = document.getElementById('red-bf-input').value || '';
+      const out = document.getElementById('red-bf-output');
+      if (!input.trim()) {
+        out.style.display = 'block';
+        out.innerHTML = '<span class="error">Paste some ciphertext first.</span>';
+        return;
+      }
+      let lines = [];
+      for (let shift = 0; shift < 26; shift++) {
+        lines.push(`shift ${shift.toString().padStart(2, '0')}: ${caesarShift(input, 26 - shift)}`);
+      }
+      out.style.display = 'block';
+      out.innerHTML = '<pre>' + escapeHtml(lines.join('\n')) + '</pre>';
+    }
+
+    function runRedTeamFrequency() {
+      const text = (document.getElementById('red-fa-input').value || '').toUpperCase();
+      const out = document.getElementById('red-fa-output');
+      if (!text.trim()) {
+        out.style.display = 'block';
+        out.innerHTML = '<span class="error">Paste some text first.</span>';
+        return;
+      }
+      const counts = {};
+      let total = 0;
+      for (const ch of text) {
+        if (ch >= 'A' && ch <= 'Z') {
+          counts[ch] = (counts[ch] || 0) + 1;
+          total += 1;
+        }
+      }
+      const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+      let lines = entries.map(([ch, c]) => {
+        const pct = total ? ((c / total) * 100).toFixed(1) : '0.0';
+        return `${ch}: ${c} (${pct}%)`;
+      });
+      if (!lines.length) {
+        lines = ['No A–Z letters found in the input.'];
+      }
+      out.style.display = 'block';
+      out.innerHTML = '<pre>' + escapeHtml(lines.join('\n')) + '</pre>';
+    }
+
+    async function sha256Hex(str) {
+      if (!window.crypto || !window.crypto.subtle) {
+        throw new Error('This demo requires SubtleCrypto (crypto.subtle) support in the browser.');
+      }
+      const enc = new TextEncoder();
+      const data = enc.encode(str);
+      const hash = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(hash))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+    }
+
+    async function runRedTeamHashCrack() {
+      const target = (document.getElementById('red-hash-input').value || '').trim().toLowerCase();
+      const out = document.getElementById('red-hash-output');
+      out.style.display = 'block';
+      if (!target) {
+        out.innerHTML = '<span class="error">Paste a SHA-256 hash first.</span>';
+        return;
+      }
+      const candidates = [
+        'password',
+        '123456',
+        '123456789',
+        'password123',
+        'admin',
+        'qwerty',
+        'letmein',
+        'welcome',
+        'iloveyou',
+      ];
+      out.innerHTML = '<span class="muted">Trying common passwords…</span>';
+      try {
+        for (const pw of candidates) {
+          const h = await sha256Hex(pw);
+          if (h === target) {
+            out.innerHTML = '<span class="success">Match found:</span> password is likely <code>' + escapeHtml(pw) + '</code>.';
+            return;
+          }
+        }
+        out.innerHTML = '<span class="muted">No match in the small demo dictionary. Real attackers use much larger wordlists and GPU rigs.</span>';
+      } catch (e) {
+        out.innerHTML = '<span class="error">' + escapeHtml(e.message || String(e)) + '</span>';
+      }
+    }
+
+    async function runPasswordHashSim() {
+      const pw = document.getElementById('pw-sim-password').value || '';
+      const salt = document.getElementById('pw-sim-salt').value || '';
+      const out = document.getElementById('pw-sim-output');
+      out.style.display = 'block';
+      if (!pw) {
+        out.innerHTML = '<span class="error">Enter a password.</span>';
+        return;
+      }
+      if (!salt) {
+        out.innerHTML = '<span class="error">Enter a salt (or make one up).</span>';
+        return;
+      }
+      try {
+        const hash = await sha256Hex(salt + '|' + pw);
+        out.innerHTML =
+          '<strong>Resulting hash (demo, SHA-256):</strong><pre>' + escapeHtml(hash) + '</pre>' +
+          '<p class="muted">If two users pick the same password but have different salts, their hashes will still be different.</p>';
+      } catch (e) {
+        out.innerHTML = '<span class="error">' + escapeHtml(e.message || String(e)) + '</span>';
+      }
+    }
+
+    function randomHex(bytes) {
+      const arr = new Uint8Array(bytes);
+      if (window.crypto && window.crypto.getRandomValues) {
+        window.crypto.getRandomValues(arr);
+      } else {
+        for (let i = 0; i < bytes; i++) {
+          arr[i] = Math.floor(Math.random() * 256);
+        }
+      }
+      return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function runTlsSim() {
+      const msg = document.getElementById('msg-sim-plaintext').value || '';
+      const mode = document.getElementById('msg-sim-mode').value;
+      const out = document.getElementById('msg-sim-output');
+      out.style.display = 'block';
+      if (!msg.trim()) {
+        out.innerHTML = '<span class="error">Enter a message first.</span>';
+        return;
+      }
+      if (mode === 'notls') {
+        out.innerHTML =
+          '<strong>Network view (no TLS):</strong><pre>' + escapeHtml(msg) + '</pre>' +
+          '<p class="muted">An on-path attacker can read and modify this message.</p>';
+      } else {
+        const fakeCipher = randomHex(32);
+        out.innerHTML =
+          '<strong>Network view (with TLS):</strong><pre>' + escapeHtml(fakeCipher) + '</pre>' +
+          '<p class="muted">The attacker only sees encrypted bytes and cannot safely alter them without breaking the connection.</p>';
       }
     }
 
@@ -383,6 +700,12 @@
     document.getElementById('decrypt-modern').addEventListener('click', () => decryptText('modern', false));
     document.getElementById('encrypt-edu').addEventListener('click', () => encryptText('educational', true));
     document.getElementById('decrypt-edu').addEventListener('click', () => decryptText('educational', true));
+
+    document.getElementById('red-bf-run').addEventListener('click', runRedTeamBruteForce);
+    document.getElementById('red-fa-run').addEventListener('click', runRedTeamFrequency);
+    document.getElementById('red-hash-run').addEventListener('click', () => { runRedTeamHashCrack(); });
+    document.getElementById('pw-sim-run').addEventListener('click', () => { runPasswordHashSim(); });
+    document.getElementById('msg-sim-run').addEventListener('click', runTlsSim);
 
     loadAlgorithms();
   </script>

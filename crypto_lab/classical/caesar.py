@@ -17,21 +17,41 @@ class CaesarCipher(BaseCipher):
     strength = CipherStrength.DEMO_ONLY
     supports_text = True
     supports_file = False
-    min_key_bytes = 1  # shift 0-255
+    # One-byte key interpreted as a shift in the A–Z / a–z alphabet (mod 26).
+    min_key_bytes = 1
 
     def encrypt_bytes(self, plaintext: bytes, key: bytes, **kwargs) -> tuple[bytes, EncryptionMetadata]:
-        shift = key[0] % 256
+        # Classical Caesar: shift alphabetic characters within A–Z / a–z, leave others unchanged.
+        shift = key[0] % 26
         result = bytearray()
         for b in plaintext:
-            result.append((b + shift) % 256)
+            if 65 <= b <= 90:  # 'A'-'Z'
+                base = 65
+                offset = (b - base + shift) % 26
+                result.append(base + offset)
+            elif 97 <= b <= 122:  # 'a'-'z'
+                base = 97
+                offset = (b - base + shift) % 26
+                result.append(base + offset)
+            else:
+                result.append(b)
         meta = build_metadata(self.algorithm_id, notes=f"shift={shift}")
         return bytes(result), meta
 
     def decrypt_bytes(self, ciphertext: bytes, key: bytes, metadata: EncryptionMetadata, **kwargs) -> bytes:
-        shift = key[0] % 256
+        shift = key[0] % 26
         result = bytearray()
         for b in ciphertext:
-            result.append((b - shift) % 256)
+            if 65 <= b <= 90:  # 'A'-'Z'
+                base = 65
+                offset = (b - base - shift) % 26
+                result.append(base + offset)
+            elif 97 <= b <= 122:  # 'a'-'z'
+                base = 97
+                offset = (b - base - shift) % 26
+                result.append(base + offset)
+            else:
+                result.append(b)
         return bytes(result)
 
 

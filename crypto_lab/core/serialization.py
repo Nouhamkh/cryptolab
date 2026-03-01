@@ -10,11 +10,13 @@ from crypto_lab.models.payload import CipherEnvelope, EncryptionMetadata
 
 
 def serialize_text_envelope(ciphertext: bytes, metadata: EncryptionMetadata) -> str:
-    """Produce a JSON string: header + base64 ciphertext."""
+    """Produce a JSON string: header + ciphertext in multiple representations."""
     envelope = {
         "schema_version": SCHEMA_VERSION,
         "header": metadata_to_dict(metadata),
         "ciphertext_b64": base64.b64encode(ciphertext).decode("ascii"),
+        # Plain view: hex-encoded bytes so it's human-readable without base64.
+        "ciphertext_hex": ciphertext.hex(),
     }
     return json.dumps(envelope)
 
