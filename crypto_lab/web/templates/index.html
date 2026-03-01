@@ -325,7 +325,14 @@
         html += '<strong>Ciphertext (base64):</strong><pre>' + escapeHtml(env.ciphertext_b64) + '</pre>';
         try {
           const raw = atob(env.ciphertext_b64);
+          // Display as escaped text and also as hex for clarity
           html += '<strong>Ciphertext (raw bytes as text):</strong><pre>' + escapeHtml(raw) + '</pre>';
+          // Also show as hex for better visibility
+          let hexStr = '';
+          for (let i = 0; i < raw.length; i++) {
+            hexStr += raw.charCodeAt(i).toString(16).padStart(2, '0') + ' ';
+          }
+          html += '<strong>Ciphertext (hex display):</strong><pre>' + escapeHtml(hexStr.trim()) + '</pre>';
         } catch (_) {
           // Ignore decoding errors; base64 might be malformed.
         }
